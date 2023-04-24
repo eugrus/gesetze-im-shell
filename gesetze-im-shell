@@ -1,5 +1,15 @@
 #!/bin/bash
 
+tools=(curl grep printf sed tr)
+missing=()
+for tool in "${tools[@]}"; do
+  command -v $tool > /dev/null || missing+=($tool)
+done
+if [ ${#missing[@]} -gt 0 ]; then
+  echo "To run this script install the following missing tools: ${missing[@]}"
+  exit 1
+fi
+
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   echo "Wie folgt aufrufen:"
   echo "./gesetze-im-shell 109d II StGB"
