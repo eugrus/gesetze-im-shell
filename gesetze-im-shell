@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ $# -lt 2 ] || [ $# -gt 3 ]; then
+  echo "Wie folgt aufrufen:"
+  echo "./gesetze-im-shell 109d II StGB"
+  echo "oder ./gesetze-im-shell 109d StGB"
+  echo "https://github.com/eugrus/gesetze-im-shell - Evgeny Fishgalov";
+  echo "Für urheberrechtlich relevante Handlungen gelten nachstehende Bedingungen: https://creativecommons.org/licenses/by-nc-sa/3.0/de/deed";
+  exit 1
+fi
+
+Paragraf=$1
+
+if [[ $2 =~ ^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$ ]]; then
+	Absatz=$2
+	Gesetz=$(echo $3 | tr '[:upper:]' '[:lower:]')
+else
+	Gesetz=$(echo $2 | tr '[:upper:]' '[:lower:]')
+fi
+
+url="https://www.gesetze-im-internet.de/${Gesetz}/__${Paragraf}.html"
+
+html=$(curl -s "$url" )
+
+text=$(printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<[^>]*>//g' | sed 's/\&auml;/ä/g; s/\&ouml;/ö/g; s/\&uuml;/ü/g; s/\&szlig;/ß/g; s/\&#228;/ä/g; s/\&#246;/ö/g; s/\&#252;/ü/g; s/\&#223;/ß/g;')
+
+echo $text
