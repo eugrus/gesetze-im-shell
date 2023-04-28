@@ -32,4 +32,4 @@ url="https://www.gesetze-im-internet.de/${Gesetz}/__${Paragraf}.html"
 
 html=$(curl -s "$url" )
 
-printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<[^>]*>//g; s/\&auml;/ä/g; s/\&Auml;/Ä/g; s/\&ouml;/ö/g; s/\&Ouml;/Ö/g; s/\&uuml;/ü/g; s/\&Uuml;/Ü/g; s/\&szlig;/ß/g; s/\&#228;/ä/g; s/\&#196;/Ä/g; s/\&#246;/ö/g; s/\&#214;/Ö/g; s/\&#252;/ü/g; s/\&#220;/Ü/g; s/\&#223;/ß/g; s/\&#167;/\§/g;'
+printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<dt>/\n<dt> /g; s/<div>/<div> /g; s/<[^>]*>//g; s/\&auml;/ä/g; s/\&Auml;/Ä/g; s/\&ouml;/ö/g; s/\&Ouml;/Ö/g; s/\&uuml;/ü/g; s/\&Uuml;/Ü/g; s/\&szlig;/ß/g; s/\&#228;/ä/g; s/\&#196;/Ä/g; s/\&#246;/ö/g; s/\&#214;/Ö/g; s/\&#252;/ü/g; s/\&#220;/Ü/g; s/\&#223;/ß/g; s/\&#167;/\§/g;'
