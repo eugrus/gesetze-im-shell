@@ -12,8 +12,10 @@ fi
 
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   echo "Wie folgt aufrufen:"
-  echo "./gesetze-im-shell 109d II StGB"
-  echo "oder ./gesetze-im-shell 109d StGB"
+  echo "§ 109d II StGB"
+  echo "oder gesetze-im-shell 109d II StGB"
+  echo "oder § 109d StGB"
+  echo "oder gesetze-im-shell 109d StGB"
   echo "https://github.com/eugrus/gesetze-im-shell - Evgeny Fishgalov";
   echo "Für urheberrechtlich relevante Handlungen gelten nachstehende Bedingungen: https://creativecommons.org/licenses/by-nc-sa/3.0/de/deed";
   exit 1
