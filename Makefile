@@ -1,0 +1,7 @@
+INSTALL_PATH=/usr/bin
+SYMBOLIC_LINK=§
+SCRIPT_NAME=gesetze-im-shell
+
+install:
+	cp $(SCRIPT_NAME) $(INSTALL_PATH)/
+	ln -s $(INSTALL_PATH)/$(SCRIPT_NAME) $(INSTALL_PATH)/$(SYMBOLIC_LINK)
