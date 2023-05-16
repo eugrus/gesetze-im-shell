@@ -12,10 +12,8 @@ fi
 
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   echo "Wie folgt aufrufen:"
-  echo "§ 109d II StGB"
-  echo "oder gesetze-im-shell 109d II StGB"
-  echo "oder § 109d StGB"
-  echo "oder gesetze-im-shell 109d StGB"
+  echo "./gesetze-im-shell 109d II StGB"
+  echo "oder ./gesetze-im-shell 109d StGB"
   echo "https://github.com/eugrus/gesetze-im-shell - Evgeny Fishgalov";
   echo "Für urheberrechtlich relevante Handlungen gelten nachstehende Bedingungen: https://creativecommons.org/licenses/by-nc-sa/3.0/de/deed";
   exit 1
@@ -24,14 +22,22 @@ fi
 Paragraf=$1
 
 if [[ $2 =~ ^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$ ]]; then
-	Absatz=$2
-	Gesetz=$(echo $3 | tr '[:upper:]' '[:lower:]')
+        Absatz=$2
+        Gesetz=$(echo $3 | tr '[:upper:]' '[:lower:]')
 else
-	Gesetz=$(echo $2 | tr '[:upper:]' '[:lower:]')
+        Gesetz=$(echo $2 | tr '[:upper:]' '[:lower:]')
 fi
 
 url="https://www.gesetze-im-internet.de/${Gesetz}/__${Paragraf}.html"
 
-html=$(curl -s "$url" )
+html=$(curl -s "$url")
 
-printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<dt>/\n<dt> /g; s/<div>/<div> /g; s/<[^>]*>//g; s/\&auml;/ä/g; s/\&Auml;/Ä/g; s/\&ouml;/ö/g; s/\&Ouml;/Ö/g; s/\&uuml;/ü/g; s/\&Uuml;/Ü/g; s/\&szlig;/ß/g; s/\&#228;/ä/g; s/\&#196;/Ä/g; s/\&#246;/ö/g; s/\&#214;/Ö/g; s/\&#252;/ü/g; s/\&#220;/Ü/g; s/\&#223;/ß/g; s/\&#167;/\§/g;'
+function parse {
+	sed 's/<[^>]*>//g; s/\&auml;/ä/g; s/\&Auml;/Ä/g; s/\&ouml;/ö/g; s/\&Ouml;/Ö/g; s/\&uuml;/ü/g; s/\&Uuml;/Ü/g; s/\&szlig;/ß/g; s/\&#228;/ä/g; s/\&#196;/Ä/g; s/\&#246;/ö/g; s/\&#214;/Ö/g; s/\&#252;/ü/g; s/\&#220;/Ü/g; s/\&#223;/ß/g; s/\&#167;/\§/g; s/\&#160;/ /g'
+}
+
+# Normtitel
+printf '%s' "$html" | grep -o '<span class="jnenbez">.*</span>' | parse
+
+# Normtext
+printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<dt>/\n<dt> /g; s/<div>/<div> /g;' | parse
