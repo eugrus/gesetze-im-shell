@@ -21,4 +21,4 @@ Und sodann funktioniert es einfach so:
 (2) Schadensersatz wegen Verzögerung der Leistung kann der Gläubiger nur unter der zusätzlichen Voraussetzung des § 286 verlangen.
 ```
 
-(für Absätze werden in der Befehlszeile römische Ziffern verwendet)
+Für einzelne Absätze werden in der Befehlszeile römische Ziffern verwendet: bei einigen Gesetzen kann diese Funktion derzeit noch unzuverlässig sein.
