@@ -12,7 +12,7 @@ fi
 
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
 	echo "Mit diesem Tool können Sie direkt im Shell Gesetzesparagraphen oder ihre einzelne Absätze (dann mit römischen Ziffern angeben) nachschauen"
-	echo "Wie folgt aufrufen (für ein Paragraf ganz):"
+	echo "Wie folgt aufrufen (für einen Paragraf ganz):"
 	echo "./gesetze-im-shell 109d StGB"
 	echo "oder für einzelnen Absatz:"
 	echo "./gesetze-im-shell 109d II StGB"
