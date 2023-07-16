@@ -1,43 +1,99 @@
 #!/bin/bash
 
-tools=(curl grep printf sed tr)
+tools=(curl grep sed tr)
 missing=()
 for tool in "${tools[@]}"; do
-  command -v $tool > /dev/null || missing+=($tool)
+	command -v $tool > /dev/null || missing+=($tool)
 done
 if [ ${#missing[@]} -gt 0 ]; then
-  echo "To run this script install the following missing tools: ${missing[@]}"
-  exit 1
+	echo "Um dieses Skript auszuführen, installieren Sie die folgenden fehlenden Tools: ${missing[@]}"
+	exit 1
 fi
 
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
-  echo "Wie folgt aufrufen:"
-  echo "./gesetze-im-shell 109d II StGB"
-  echo "oder ./gesetze-im-shell 109d StGB"
-  echo "https://github.com/eugrus/gesetze-im-shell - Evgeny Fishgalov";
-  echo "Für urheberrechtlich relevante Handlungen gelten nachstehende Bedingungen: https://creativecommons.org/licenses/by-nc-sa/3.0/de/deed";
-  exit 1
+	echo "Mit diesem Tool können Sie direkt im Shell Gesetzesparagraphen oder ihre einzelne Absätze (dann mit römischen Ziffern angeben) nachschauen"
+	echo "Wie folgt aufrufen (für ein Paragraf ganz):"
+	echo "./gesetze-im-shell 109d StGB"
+	echo "oder für einzelnen Absatz:"
+	echo "./gesetze-im-shell 109d II StGB"
+	echo "oder nach Installation durch make install schlicht:"
+	echo "§ 109d StGB"
+	echo "bzw. § 109 II StGB"
+	echo "https://github.com/eugrus/gesetze-im-shell - Evgeny Fishgalov";
+	echo "Für urheberrechtlich relevante Handlungen gelten nachstehende Bedingungen: https://creativecommons.org/licenses/by-nc-sa/3.0/de/deed";
+	exit 1
 fi
 
 Paragraf=$1
 
 if [[ $2 =~ ^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$ ]]; then
-        Absatz=$2
-        Gesetz=$(echo $3 | tr '[:upper:]' '[:lower:]')
+	Absatz=$2
+	Gesetz=$(echo $3 | tr '[:upper:]' '[:lower:]')
 else
-        Gesetz=$(echo $2 | tr '[:upper:]' '[:lower:]')
+	Gesetz=$(echo $2 | tr '[:upper:]' '[:lower:]')
 fi
 
 url="https://www.gesetze-im-internet.de/${Gesetz}/__${Paragraf}.html"
 
 html=$(curl -s "$url")
 
-function parse {
+function decodehtml {
 	sed 's/<[^>]*>//g; s/\&auml;/ä/g; s/\&Auml;/Ä/g; s/\&ouml;/ö/g; s/\&Ouml;/Ö/g; s/\&uuml;/ü/g; s/\&Uuml;/Ü/g; s/\&szlig;/ß/g; s/\&#228;/ä/g; s/\&#196;/Ä/g; s/\&#246;/ö/g; s/\&#214;/Ö/g; s/\&#252;/ü/g; s/\&#220;/Ü/g; s/\&#223;/ß/g; s/\&#167;/\§/g; s/\&#160;/ /g'
 }
 
-# Normtitel
-printf '%s' "$html" | grep -o '<span class="jnenbez">.*</span>' | parse
+roman_to_arabic() {
+    local roman_numeral=$1
+    local result=0
 
-# Normtext
-printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<dt>/\n<dt> /g; s/<div>/<div> /g;' | parse
+    declare -A roman_values
+    roman_values["I"]=1
+    roman_values["V"]=5
+    roman_values["X"]=10
+    roman_values["L"]=50
+    roman_values["C"]=100
+    roman_values["D"]=500
+    roman_values["M"]=1000
+
+    local prev_value=0
+
+    for ((i=${#roman_numeral}-1; i>=0; i--)); do
+        local current_char="${roman_numeral:$i:1}"
+        local current_value=${roman_values[$current_char]}
+        if ((current_value < prev_value)); then
+            result=$((result - current_value))
+        else
+            result=$((result + current_value))
+        fi
+        prev_value=$current_value
+    done
+    echo $result
+}
+
+# Normtitel
+printf '%s' "$html" | grep -o '<span class="jnenbez">.*</span>' | decodehtml
+
+# Falls kein Absatz spezifiziert
+if [ -z $Absatz ]; then
+		
+		printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<dt>/\n<dt> /g; s/<div>/<div> /g;' | decodehtml
+
+
+# Falls Absatz spezifiziert		
+else
+
+Absnr=$(roman_to_arabic $Absatz)
+
+count=1
+
+while [[ $html =~ class\=\"jurAbsatz\"\>([^\<]*)\<\/div\>(.*) ]]; do
+
+    if [ "$count" -eq "$Absnr" ]; then
+        echo "${BASH_REMATCH[1]}" | decodehtml
+        break
+    fi
+
+    html="${BASH_REMATCH[2]}" # Regards to s-warus on https://www.linux.org.ru/forum/development/17289104 for this pattern matching!
+    ((count++))
+done
+
+fi
