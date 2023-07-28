@@ -12,7 +12,7 @@ fi
 
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
 	echo "Mit diesem Tool können Sie direkt im Shell Gesetzesparagraphen oder ihre einzelne Absätze (dann mit römischen Ziffern angeben) nachschauen"
-	echo "Wie folgt aufrufen (für einen Paragraf ganz):"
+	echo "Wie folgt aufrufen (für ein Paragraf ganz):"
 	echo "./gesetze-im-shell 109d StGB"
 	echo "oder für einzelnen Absatz:"
 	echo "./gesetze-im-shell 109d II StGB"
@@ -75,25 +75,21 @@ printf '%s' "$html" | grep -o '<span class="jnenbez">.*</span>' | decodehtml
 # Falls kein Absatz spezifiziert
 if [ -z $Absatz ]; then
 		
-		printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<dt>/\n<dt> /g; s/<div>/<div> /g;' | decodehtml
+	printf '%s' "$html" | grep -o '<div class="jnhtml">.*</div>' | sed 's/<div class="jurAbsatz">/\n<div class="jurAbsatz">/g; s/<dt>/\n<dt> /g; s/<div>/<div> /g;' | decodehtml
 
 
 # Falls Absatz spezifiziert		
 else
+	Absnr=$(roman_to_arabic $Absatz)
 
-Absnr=$(roman_to_arabic $Absatz)
+	#  regards to s-warus on https://www.linux.org.ru/forum/development/17289104 for his contribution to the following part
+	
+	html=`echo $html|grep -o "<div class=\"jurAbsatz\">($Absnr).*"`
+	((Absnr++))
+	html2=`echo $html|grep -o ".*<div class=\"jurAbsatz\">($Absnr)"`
 
-count=1
-
-while [[ $html =~ class\=\"jurAbsatz\"\>([^\<]*)\<\/div\>(.*) ]]; do
-
-    if [ "$count" -eq "$Absnr" ]; then
-        echo "${BASH_REMATCH[1]}" | decodehtml
-        break
-    fi
-
-    html="${BASH_REMATCH[2]}" # Regards to s-warus on https://www.linux.org.ru/forum/development/17289104 for this pattern matching!
-    ((count++))
-done
-
+	if [ -z "$html2" ]; then
+	        html2="$html"
+	fi
+	echo $html2|sed "s/<div class=\"jurAbsatz\">($Absnr)//g" | sed 's/<dl/\n<dl/g;s#</div></div>##g;s#</div>#</div>\n#g;' | sed '/<div id="fusszeile">/,/<\/div>/d' | decodehtml
 fi
