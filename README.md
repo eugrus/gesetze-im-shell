@@ -21,4 +21,4 @@ Und sodann funktioniert es einfach so:
 (2) Schadensersatz wegen Verzögerung der Leistung kann der Gläubiger nur unter der zusätzlichen Voraussetzung des § 286 verlangen.
 ```
 
--- [Evgeny Fishgalov, Diplom-Jurist](https://www.linkedin.com/in/efishgalov/)
+-- [Evgeny Fishgalov, M.Iur.](https://www.linkedin.com/in/efishgalov/)
